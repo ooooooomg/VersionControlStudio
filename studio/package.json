@@ -1,0 +1,40 @@
+{
+  "name": "versioncontrol-studio",
+  "version": "1.0.0",
+  "description": "VersionControl Studio — git 驱动的工作区版本控制 Windows 桌面端:内置 MCP 服务(AI 直连)+ 版本驾驶舱",
+  "type": "module",
+  "author": {
+    "name": "Ash"
+  },
+  "license": "MIT",
+  "main": "dist/main/index.js",
+  "scripts": {
+    "build": "node build.mjs",
+    "typecheck": "tsc --noEmit",
+    "start": "node build.mjs && electron .",
+    "smoke": "node build.mjs && electron . --smoke",
+    "dist": "node build.mjs && electron-builder --win",
+    "dist:publish": "node build.mjs && electron-builder --win --publish always"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "electron": "^37.0.0",
+    "electron-builder": "^26.0.12",
+    "esbuild": "^0.25.0",
+    "typescript": "^5.9.0"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "electron-updater": "^6.6.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "versioncontrol-mcp": "file:../core",
+    "zod": "^4.6.5"
+  },
+  "allowScripts": {
+    "electron@37.10.3": true,
+    "esbuild@0.25.12": true
+  }
+}

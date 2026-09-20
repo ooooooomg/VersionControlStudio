@@ -1,0 +1,19 @@
+{
+  "name": "version-control-studio",
+  "owner": { "name": "Ash" },
+  "metadata": {
+    "description": "VersionControl Studio 插件市场:git 驱动的工作区版本控制(MCP 服务 + skill)",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "version-control-studio",
+      "source": "./core",
+      "description": "git 驱动的工作区版本控制 MCP 服务:V X.Y.Z 版本树、并行分支、服务端强制校验、自动版本文档与回滚(附 vcs 工作流 skill)",
+      "version": "1.0.0",
+      "author": { "name": "Ash" },
+      "license": "MIT",
+      "keywords": ["mcp", "version-control", "git", "workspace", "vcs"]
+    }
+  ]
+}

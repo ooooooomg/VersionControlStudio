@@ -1,0 +1,27 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-09-29/server.schema.json",
+  "name": "io.github.ooooooomg/versioncontrol-mcp",
+  "display_name": "VersionControl MCP",
+  "description": "Git-backed workspace version control for AI tools: V X.Y.Z version tree, parallel branches, server-enforced validation, auto version docs and rollback. 工作区全流程版本管理,服务端强制校验,回滚不改写历史。",
+  "version": "1.0.0",
+  "homepage": "https://github.com/ooooooomg/VersionControlStudio",
+  "author": { "name": "Ash" },
+  "license": "MIT",
+  "packages": [
+    {
+      "registry_type": "npm",
+      "identifier": "versioncontrol-mcp",
+      "version": "1.0.0",
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ],
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "http://127.0.0.1:8471/mcp",
+      "description": "VersionControl Studio 桌面应用内置端点(仅本机回环,应用启动即可用)"
+    }
+  ]
+}

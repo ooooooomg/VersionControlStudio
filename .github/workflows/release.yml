@@ -1,0 +1,75 @@
+# 发布:推送 v* 标签触发 → 测试 → 打包 NSIS 安装器 + portable 绿色版
+#   → 发布 GitHub Releases → 发 npm 包 versioncontrol-mcp → 生成 MCPB 与源码 zip 并附到 Release
+# 前置 secrets:NPM_TOKEN(npm 发布令牌,settings → secrets and variables → actions)
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org
+
+      - name: 用实际仓库归属替换 OWNER 占位符(打包元数据)
+        shell: pwsh
+        run: |
+          $owner = $env:GITHUB_REPOSITORY.Split("/")[0]
+          foreach ($f in @("core/package.json", "studio/electron-builder.yml")) {
+            (Get-Content $f -Raw) -replace "OWNER", $owner | Set-Content $f -NoNewline
+          }
+
+      - name: 核心引擎:安装 + 测试 + 构建
+        working-directory: core
+        run: |
+          npm ci --no-fund --no-audit
+          npm test
+          npm run build
+
+      - name: 桌面端:安装 + 类型检查 + 构建
+        working-directory: studio
+        run: |
+          npm ci --no-fund --no-audit
+          npm run typecheck
+          npm run build
+
+      - name: 打包并发布到 GitHub Releases(NSIS + portable + 自动更新元数据)
+        working-directory: studio
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm run dist:publish
+
+      - name: 发布 npm 包 versioncontrol-mcp
+        working-directory: core
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --access public
+
+      - name: 生成 MCPB 一键安装包(Claude Desktop 拖入即装)
+        working-directory: core
+        run: |
+          node scripts/make-mcpb.mjs
+          $f = Get-ChildItem "*.mcpb" | Select-Object -First 1
+          "MCPB_FILE=$($f.Name)" | Add-Content $env:GITHUB_ENV
+        shell: pwsh
+
+      - name: 附加 MCPB 与源码 zip 到 Release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $tag = $env:GITHUB_REF_NAME
+          git archive --format=zip -o "VersionControlStudio-src-$tag.zip" HEAD
+          $files = @("VersionControlStudio-src-$tag.zip")
+          if ($env:MCPB_FILE) { $files += $env:MCPB_FILE }
+          gh release upload "$tag" @files --clobber --repo $env:GITHUB_REPOSITORY

@@ -1,0 +1,52 @@
+{
+  "name": "versioncontrol-mcp",
+  "version": "1.0.0",
+  "description": "Git-backed workspace version control for AI tools (MCP server + CLI). 工作区全流程版本管理:V X.Y.Z 版本树、并行分支、服务端强制校验、自动版本文档与回滚。",
+  "type": "module",
+  "license": "MIT",
+  "author": { "name": "Ash" },
+  "bin": {
+    "versioncontrol-mcp": "dist/cli.js"
+  },
+  "main": "dist/index.js",
+  "files": [
+    "dist",
+    "skills",
+    ".zcode-plugin",
+    ".claude-plugin",
+    "mcpb-manifest.json",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ooooooomg/VersionControlStudio.git",
+    "directory": "core"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "version-control",
+    "git",
+    "ai",
+    "claude",
+    "cursor",
+    "workspace"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "serve": "node dist/index.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.0"
+  }
+}

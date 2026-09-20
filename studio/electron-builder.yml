@@ -1,0 +1,37 @@
+# electron-builder 打包配置:NSIS 安装器 + portable 绿色版双产物,发布到 GitHub Releases。
+# appId 与 publish 归属已填实际仓库(ooooooomg);release.yml 的 OWNER 替换步骤对已替换文件为 no-op。
+appId: io.github.ooooooomg.versioncontrol-studio
+productName: VersionControlStudio
+directories:
+  output: release
+  buildResources: resources
+files:
+  - "dist/**"
+  - "resources/icons/**"
+asar: true
+# stdio 桥与核心引擎解包到 app.asar.unpacked:AI 客户端以外部进程拉起它们,读不了 asar
+asarUnpack:
+  - "dist/main/stdio-bridge.mjs"
+  - "node_modules/versioncontrol-mcp/**"
+win:
+  icon: resources/icons/icon.ico
+  target:
+    - target: nsis
+      arch: [x64]
+    - target: portable
+      arch: [x64]
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: always
+  createStartMenuShortcut: true
+  shortcutName: VersionControlStudio
+  artifactName: ${productName}-${version}-Setup.${ext}
+  deleteAppDataOnUninstall: false
+portable:
+  artifactName: ${productName}-${version}-portable.${ext}
+publish:
+  provider: github
+  owner: ooooooomg
+  repo: VersionControlStudio

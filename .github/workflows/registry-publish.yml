@@ -1,0 +1,40 @@
+# 官方 MCP Registry 发布(独立于 Release 主流程,失败不影响安装器/npm 发布)。
+# 前置(一次性):
+#   1. OWNER 占位符已在仓库文件中替换为实际归属(ooooooomg);
+#   2. 在 registry 完成仓库/命名空间登记(按 registry 文档指引)。
+# OIDC 免密:needs id-token 权限;无需存放 registry 密钥。
+name: MCP Registry Publish
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: 同步版本号(core package.json → server.json)
+        run: |
+          VER=$(node -p "require('./core/package.json').version")
+          node -e "const fs=require('fs');const v=process.argv[1];const p=JSON.parse(fs.readFileSync('server.json','utf8'));p.version=v;(p.packages||[]).forEach(x=>x.version=v);fs.writeFileSync('server.json',JSON.stringify(p,null,2)+'\n');" "$VER"
+
+      - name: 安装 mcp-publisher(如安装地址变更以 registry 官方文档为准)
+        run: |
+          curl -fsSL "https://raw.githubusercontent.com/modelcontextprotocol/registry/main/scripts/install.sh" | bash
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: 登录(GitHub OIDC)并发布
+        run: |
+          mcp-publisher login github-oidc
+          mcp-publisher publish

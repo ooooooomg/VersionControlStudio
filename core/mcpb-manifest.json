@@ -1,0 +1,23 @@
+{
+  "manifest_version": "0.2",
+  "name": "versioncontrol-mcp",
+  "display_name": "VersionControl MCP",
+  "version": "1.0.0",
+  "description": "Git-backed workspace version control for AI tools: V X.Y.Z version tree, parallel branches, server-enforced validation, auto version docs and rollback.",
+  "author": { "name": "Ash" },
+  "license": "MIT",
+  "server": {
+    "type": "node",
+    "entry_point": "dist/index.js",
+    "mcp_config": {
+      "command": "node",
+      "args": ["${__dirname}/dist/index.js"],
+      "env": {}
+    }
+  },
+  "compatibility": {
+    "platforms": ["darwin", "linux", "win32"],
+    "runtimes": { "node": ">=20.0.0" }
+  },
+  "keywords": ["mcp", "version-control", "git", "workspace", "ai"]
+}

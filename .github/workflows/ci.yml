@@ -1,0 +1,31 @@
+# CI:每次 push / PR 在 Windows 上跑核心测试与桌面端构建冒烟
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: 核心引擎 versioncontrol-mcp:安装 + 测试 + 构建
+        working-directory: core
+        run: |
+          npm ci --no-fund --no-audit
+          npm test
+          npm run build
+
+      - name: 桌面端:安装 + 类型检查 + 构建 + 冒烟
+        working-directory: studio
+        run: |
+          npm ci --no-fund --no-audit
+          npm run typecheck
+          npm run build
+          npm run smoke

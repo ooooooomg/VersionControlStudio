@@ -49,8 +49,9 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npm run dist:publish
 
-      - name: 发布 npm 包 versioncontrol-mcp
+      - name: 发布 npm 包 versioncontrol-mcp(未配 NPM_TOKEN 时该步失败不阻塞,Release 与 MCPB 照常)
         working-directory: core
+        continue-on-error: true
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm publish --access public

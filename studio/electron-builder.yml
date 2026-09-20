@@ -35,3 +35,4 @@ publish:
   provider: github
   owner: ooooooomg
   repo: VersionControlStudio
+  releaseType: release

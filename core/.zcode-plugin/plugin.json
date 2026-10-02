@@ -1,6 +1,6 @@
 {
   "name": "version-control-studio",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "git 驱动的工作区版本控制 MCP 服务:V X.Y.Z 版本树、并行分支、服务端强制校验、自动版本文档与回滚",
   "author": { "name": "Ash" },
   "license": "MIT",

@@ -1,6 +1,6 @@
 {
   "name": "versioncontrol-mcp",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Git-backed workspace version control for AI tools (MCP server + CLI). 工作区全流程版本管理:V X.Y.Z 版本树、并行分支、服务端强制校验、自动版本文档与回滚。",
   "type": "module",
   "license": "MIT",

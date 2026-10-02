@@ -1,9 +1,10 @@
 # 发布:推送 v* 标签触发 → 测试 → 打包 NSIS 安装器 + portable 绿色版
 #   → 发布 GitHub Releases(先草稿,产物上齐后置为公开)→ 生成 MCPB 与源码 zip 并附到 Release
 # 分发不依赖 npm:桌面安装包/HTTP 端点/MCPB/插件/skill 全部开箱即用,无需注册任何账号或配置任何 secret。
-# 注意:electron-builder.yml 的 publish 块保持只有 provider/owner/repo——2026-09-20 的 v1.0.0 CI 曾对含
-# releaseType 的 publish 配置报 schema 校验错(provider must be equal to constant);「非草稿」由本文件
-# 末步 gh release edit --draft=false 完成,不依赖 electron-builder 的 releaseType。
+# 注意:publish 配置里不要出现任何占位符或额外键——仓库文件已全部填实际归属(ooooooomg)。
+# 历史教训:v1.0.0 与 v1.0.1 两轮 Release 均败于原「替换 OWNER 占位符」步骤:PowerShell -replace
+# 大小写不敏感,把 electron-builder.yml 的键名 owner: 也替换成了 ooooooomg:,publish 对象因
+# 未知属性被 schema 拒绝(configuration.publish.provider must be equal to constant)。该步骤已删除。
 name: Release
 
 on:
@@ -22,14 +23,6 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 20
-
-      - name: 用实际仓库归属替换 OWNER 占位符(打包元数据)
-        shell: pwsh
-        run: |
-          $owner = $env:GITHUB_REPOSITORY.Split("/")[0]
-          foreach ($f in @("core/package.json", "studio/electron-builder.yml")) {
-            (Get-Content $f -Raw) -replace "OWNER", $owner | Set-Content $f -NoNewline
-          }
 
       - name: 核心引擎:安装 + 测试 + 构建
         working-directory: core

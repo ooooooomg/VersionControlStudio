@@ -34,10 +34,15 @@ beforeAll(async () => {
   await git(repo, ["init", "-b", "master"]);
   await git(repo, ["config", "user.email", "t@t"]);
   await git(repo, ["config", "user.name", "T"]);
-  // 子进程用例跑的是编译产物:每次强制重建,保证 dist 与 src 一致
+  // 子进程用例跑的是编译产物:每次强制重建(tsc + esbuild 自包含打包),保证 dist 与 src 一致
   await pexec(
     process.execPath,
     [path.resolve(import.meta.dirname, "../node_modules/typescript/bin/tsc"), "-p", path.resolve(import.meta.dirname, "..")],
+    { cwd: path.resolve(import.meta.dirname, "..") },
+  );
+  await pexec(
+    process.execPath,
+    [path.resolve(import.meta.dirname, "../scripts/bundle.mjs")],
     { cwd: path.resolve(import.meta.dirname, "..") },
   );
 });

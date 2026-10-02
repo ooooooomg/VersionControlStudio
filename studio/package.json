@@ -1,6 +1,6 @@
 {
   "name": "versioncontrol-studio",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "VersionControl Studio — git 驱动的工作区版本控制 Windows 桌面端:内置 MCP 服务(AI 直连)+ 版本驾驶舱",
   "type": "module",
   "author": {

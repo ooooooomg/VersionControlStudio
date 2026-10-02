@@ -4,7 +4,6 @@
 
 [![CI](https://github.com/ooooooomg/VersionControlStudio/actions/workflows/ci.yml/badge.svg)](https://github.com/ooooooomg/VersionControlStudio/actions/workflows/ci.yml)
 [![GitHub Release](https://img.shields.io/github/v/release/ooooooomg/VersionControlStudio)](https://github.com/ooooooomg/VersionControlStudio/releases/latest)
-[![npm](https://img.shields.io/npm/v/versioncontrol-mcp)](https://www.npmjs.com/package/versioncontrol-mcp)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 Windows 桌面应用(Electron)内置 MCP 服务端,一套核心三种入口:图形界面、HTTP MCP、stdio MCP——人与 AI 看到的是同一份数据,写操作全部留审计。
@@ -14,7 +13,7 @@ Windows 桌面应用(Electron)内置 MCP 服务端,一套核心三种入口:图�
 | 你是 | 拿到什么 | 需要预装 |
 |---|---|---|
 | ① 想要图形界面 | 安装包 `Setup.exe`,双击装好 | 仅 Git(应用会自动检测并引导安装) |
-| ② 只要给 AI 工具接 MCP | 一行 `npx` 配置,零安装 | Node.js ≥ 20 |
+| ② 只要给 AI 工具接 MCP | ①装好桌面应用即得 HTTP 端点;或 MCPB / 插件 | 走桌面应用零依赖;MCPB 与插件需 Node.js ≥ 20 |
 | ③ 开发者 | 源码构建 | Node.js ≥ 20、Git、npm |
 
 ---
@@ -33,36 +32,27 @@ Windows 桌面应用(Electron)内置 MCP 服务端,一套核心三种入口:图�
 
 ## ② 只要 MCP(无界面)
 
-任何支持 MCP 的客户端(Claude Desktop、Cursor、ZCode 等),把服务端配置加进去即可:
+三种接法,按需选择(均无需注册任何账号):
 
-```json
-{
-  "mcpServers": {
-    "version-control-studio": {
-      "command": "npx",
-      "args": ["-y", "versioncontrol-mcp"]
-    }
-  }
-}
-```
+**A. 桌面应用 HTTP 端点(最省事,任意客户端可用)**:①装好桌面应用后,`http://127.0.0.1:8471/mcp` 随应用自动启动——Cursor / VS Code Copilot / Windsurf 等任何支持 HTTP MCP 的客户端直接连它,零额外安装。stdio 客户端可在应用「设置 → Agent 工具连接」一键写入配置(用应用自带运行时,同样不需要 Node.js)。
 
-- 可选环境变量 `PAPER_VERSION_REPO=<项目绝对路径>`:缺省工作区;不设则每次调用传 `repoPath` 参数。
-- 26 个 `vcs_*` 工具:状态/版本/回滚/并行分支/审计,详见 [core/README.md](core/README.md)。
+**B. Claude Desktop 一键安装**:到 [Releases](https://github.com/ooooooomg/VersionControlStudio/releases/latest) 下载 `versioncontrol-mcp-x.x.x.mcpb`,双击即装(MCP Bundle 格式,需 Node.js ≥ 20)。
 
-**Claude Desktop 一键安装**:到 [Releases](https://github.com/ooooooomg/VersionControlStudio/releases/latest) 下载 `versioncontrol-mcp-x.x.x.mcpb`,双击即装(MCP Bundle 格式)。
-
-**装配套 skill(推荐)**:让 AI 主动按正确工作流使用这组工具——
-
-```bash
-npx skills add ooooooomg/VersionControlStudio
-```
-
-**作为 Claude Code / ZCode 插件安装**(MCP 服务 + skill 一起装):
+**C. Claude Code / ZCode 插件(MCP 服务 + skill 一起装)**:
 
 ```
 # Claude Code / ZCode
 plugin marketplace add ooooooomg/VersionControlStudio
 plugin install version-control-studio@version-control-studio
+```
+
+- 可选环境变量 `PAPER_VERSION_REPO=<项目绝对路径>`:缺省工作区;不设则每次调用传 `repoPath` 参数。
+- 25 个 `vcs_*` 工具:状态/版本/回滚/并行分支/审计,详见 [core/README.md](core/README.md)。
+
+**装配套 skill(推荐)**:让 AI 主动按正确工作流使用这组工具——
+
+```bash
+npx skills add ooooooomg/VersionControlStudio
 ```
 
 ## ③ 开发者:源码构建
@@ -80,7 +70,7 @@ npm run smoke    # 无头自检
 npm run dist     # 本地打包:release/ 下出 Setup.exe + portable.exe
 ```
 
-CI 在每次 push/PR 自动跑核心测试与桌面端冒烟;推 `v*` 标签自动发布 Releases + npm + MCPB(见 `.github/workflows/`)。
+CI 在 main 分支 push / PR 时自动跑核心测试与桌面端冒烟;推 `v*` 标签自动发布 Releases(Setup / portable / MCPB / 源码 zip,见 `.github/workflows/`)。分发不依赖 npm——核心引擎的 `dist/` 为自包含打包(esbuild bundle),插件与 MCPB 场景零安装直接运行。
 
 ---
 

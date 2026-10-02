@@ -1,5 +1,5 @@
 # electron-builder 打包配置:NSIS 安装器 + portable 绿色版双产物,发布到 GitHub Releases。
-# appId 与 publish 归属已填实际仓库(ooooooomg);release.yml 的 OWNER 替换步骤对已替换文件为 no-op。
+# 归属已填实际仓库(ooooooomg);release.yml 的 OWNER 替换步骤对已替换文件为 no-op。
 appId: io.github.ooooooomg.versioncontrol-studio
 productName: VersionControlStudio
 directories:
@@ -31,6 +31,9 @@ nsis:
   deleteAppDataOnUninstall: false
 portable:
   artifactName: ${productName}-${version}-portable.${ext}
+# publish 块保持只有 provider/owner/repo:2026-09-20 的 v1.0.0 CI 曾对含 releaseType 的
+# publish 配置报 schema 校验错(configuration.publish.provider must be equal to constant,
+# 同配置本地构建通过);「发布非草稿」由 release.yml 末步 gh release edit --draft=false 完成。
 publish:
   provider: github
   owner: ooooooomg

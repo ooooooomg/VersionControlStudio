@@ -12,8 +12,8 @@ VersionControl Studio 是一个 Windows 桌面应用,为 AI 辅助的项目编�
 
 | 组件 | 位置 | 说明 |
 |---|---|---|
-| 核心引擎 versioncontrol-mcp | `core`(npm 包 [`versioncontrol-mcp`](https://www.npmjs.com/package/versioncontrol-mcp)) | TypeScript 库,实现工作区模型、版本规则、git 操作、MCP 工具定义与 CLI。编译产物为 `dist/`(ESM)。所有业务规则只在这一处实现 |
-| 桌面应用 VersionControl Studio | `studio`(npm 包 `versioncontrol-studio`) | Electron 应用。GUI 四视图、内置 HTTP MCP 端点、stdio 桥、AI 客户端配置写入、应用内自动更新。通过 npm 符号链接引用核心引擎(`node_modules/versioncontrol-mcp -> ../core`,同工作区内部),核心重建后即刻生效 |
+| 核心引擎 versioncontrol-mcp | `core` | TypeScript 库,实现工作区模型、版本规则、git 操作、MCP 工具定义与 CLI。运行产物 `dist/` 为自包含打包(esbuild bundle,零运行依赖,插件/MCPB 场景直接可跑);类型产物 `dist/*.d.ts` 供 IDE。所有业务规则只在这一处实现 |
+| 桌面应用 VersionControl Studio | `studio` | Electron 应用。GUI 四视图、内置 HTTP MCP 端点、stdio 桥、AI 客户端配置写入、应用内自动更新。通过 npm 符号链接引用核心引擎(`node_modules/versioncontrol-mcp -> ../core`,同工作区内部),核心重建后即刻生效 |
 | 触发 skill | `core/skills/version-control-studio/` | 告知 AI 工具:用户说"对此工作区进行版本管理"时,先 `vcs_analyze` 分析文件夹,再按方案 `vcs_init`。经 `npx skills add ooooooomg/VersionControlStudio` 或插件市场分发 |
 
 三层入口(GUI 的 IPC、HTTP MCP、stdio MCP)调用同一个核心库,校验规则不可绕过。
@@ -66,7 +66,7 @@ vcs_commit(summary, bump)   越界检查 → 定版号 → 生成 V 文件夹两
 
 ## 6. MCP 工具参考
 
-服务名 `vcs-workspace`,共 26 个工具。除 `vcs_analyze` 外均有可选参数 `repoPath`(工作区绝对路径;缺省时依次取环境变量 `PAPER_VERSION_REPO`、当前目录;多项目环境必须显式传入)。
+服务名 `vcs-workspace`,共 25 个工具。除 `vcs_analyze` 外均有可选参数 `repoPath`(工作区绝对路径;缺省时依次取环境变量 `PAPER_VERSION_REPO`、当前目录;多项目环境必须显式传入)。
 
 | 工具 | 参数 | 作用 |
 |---|---|---|
@@ -118,7 +118,7 @@ stdio 桥以独立进程运行,与 HTTP 端点共用同一核心。注意:它是
 | `readonly` | 拦截全部 18 个写工具(名单以 core 的 WRITE_TOOLS 为单一事实来源),返回明确错误 |
 | `auto` | 直接执行,全部写入审计日志(默认) |
 
-**确认已接入**:设置页各客户端行显示"已检测到配置";或对端点做 initialize + tools/list 握手,应返回 26 个工具。
+**确认已接入**:设置页各客户端行显示"已检测到配置";或对端点做 initialize + tools/list 握手,应返回 25 个工具。
 
 ## 8. 桌面应用
 
@@ -142,12 +142,12 @@ stdio 桥以独立进程运行,与 HTTP 端点共用同一核心。注意:它是
 
 ## 10. 构建与测试
 
-核心引擎(仓库内 `core`,即 npm 包 versioncontrol-mcp):
+核心引擎(仓库内 `core`):
 
 ```bash
 npm install
 npm test             # vitest,6 个文件 67 个用例(含并发竞态与未登记提交检测)
-npm run build        # tsc → dist/(ESM)
+npm run build        # tsc(类型)→ dist/,esbuild 自包含打包 index.js / cli.js
 ```
 
 桌面应用(仓库内 `studio`):
@@ -161,7 +161,7 @@ npm run dist         # electron-builder 本地打包 → release/(NSIS 安装器
 npm run dist:publish # 打包并发布到 GitHub Releases(CI 用,需 GH_TOKEN)
 ```
 
-发布链路(`.github/workflows/`):CI 每次 push/PR 跑核心测试 + 桌面端冒烟;推 `v*` 标签触发 Release——自动打包双产物并发布 GitHub Releases、发布 npm 包、生成 MCPB 一键安装包与源码 zip 一并附加;`registry-publish.yml` 向官方 MCP Registry 提交 server.json(独立运行,失败不影响 Release)。
+发布链路(`.github/workflows/`):CI 在 main 分支 push / PR 跑核心测试 + 桌面端冒烟;推 `v*` 标签触发 Release——自动打包双产物并发布 GitHub Releases、生成 MCPB 一键安装包与源码 zip 一并附加,末步自动置为公开。分发不依赖 npm,无需配置任何 secret。
 
 应用内自动更新:electron-updater(GitHub provider),仅安装版生效;设置页"检查更新"手动触发,确认后下载并重启安装。首次启动检测 git 缺失并弹引导(winget / 官网)。产物未做代码签名:SmartScreen 首次运行需"更多信息 → 仍要运行"。
 

@@ -2,7 +2,7 @@
   "manifest_version": "0.2",
   "name": "versioncontrol-mcp",
   "display_name": "VersionControl MCP",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Git-backed workspace version control for AI tools: V X.Y.Z version tree, parallel branches, server-enforced validation, auto version docs and rollback.",
   "author": { "name": "Ash" },
   "license": "MIT",

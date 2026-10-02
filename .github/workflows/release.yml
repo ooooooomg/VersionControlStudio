@@ -1,6 +1,9 @@
 # 发布:推送 v* 标签触发 → 测试 → 打包 NSIS 安装器 + portable 绿色版
-#   → 发布 GitHub Releases → 发 npm 包 versioncontrol-mcp → 生成 MCPB 与源码 zip 并附到 Release
-# 前置 secrets:NPM_TOKEN(npm 发布令牌,settings → secrets and variables → actions)
+#   → 发布 GitHub Releases(先草稿,产物上齐后置为公开)→ 生成 MCPB 与源码 zip 并附到 Release
+# 分发不依赖 npm:桌面安装包/HTTP 端点/MCPB/插件/skill 全部开箱即用,无需注册任何账号或配置任何 secret。
+# 注意:electron-builder.yml 的 publish 块保持只有 provider/owner/repo——2026-09-20 的 v1.0.0 CI 曾对含
+# releaseType 的 publish 配置报 schema 校验错(provider must be equal to constant);「非草稿」由本文件
+# 末步 gh release edit --draft=false 完成,不依赖 electron-builder 的 releaseType。
 name: Release
 
 on:
@@ -14,12 +17,11 @@ jobs:
   release:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 20
-          registry-url: https://registry.npmjs.org
 
       - name: 用实际仓库归属替换 OWNER 占位符(打包元数据)
         shell: pwsh
@@ -49,11 +51,15 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npm run dist:publish
 
-      - name: 发布 npm 包 versioncontrol-mcp
-        working-directory: core
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --access public
+      - name: 打包失败诊断(打印生效配置与实际解析的版本)
+        if: failure()
+        working-directory: studio
+        shell: pwsh
+        run: |
+          "=== electron-builder.yml ==="
+          Get-Content electron-builder.yml
+          "=== 实际解析版本 ==="
+          npm ls electron-builder app-builder-lib --depth=0
 
       - name: 生成 MCPB 一键安装包(Claude Desktop 拖入即装)
         working-directory: core
@@ -63,7 +69,7 @@ jobs:
           "MCPB_FILE=$($f.Name)" | Add-Content $env:GITHUB_ENV
         shell: pwsh
 
-      - name: 附加 MCPB 与源码 zip 到 Release
+      - name: 附加 MCPB 与源码 zip 到 Release 并置为公开
         shell: pwsh
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -73,3 +79,4 @@ jobs:
           $files = @("VersionControlStudio-src-$tag.zip")
           if ($env:MCPB_FILE) { $files += $env:MCPB_FILE }
           gh release upload "$tag" @files --clobber --repo $env:GITHUB_REPOSITORY
+          gh release edit "$tag" --draft=false --latest --repo $env:GITHUB_REPOSITORY

@@ -1,7 +1,7 @@
 /**
  * 生成 versioncontrol-mcp.mcpb(Claude Desktop 一键安装包):
- * 1. 暂存目录装生产依赖(sdk+zod),拷入 dist/ 与按 package.json 版本号填充的 manifest.json;
- * 2. 调 mcpb CLI 打包,产物落在本目录。
+ * 暂存目录 = package.json + dist/(自包含打包,零运行依赖)+ 按版本号填充的 manifest.json,
+ * 调 mcpb CLI 打包,产物落在本目录。
  * 本地与 CI(release.yml)共用;需要网络下载 mcpb CLI。
  */
 import { spawnSync } from "node:child_process";
@@ -16,9 +16,8 @@ const stage = path.join(root, "build", "mcpb-stage");
 rmSync(stage, { recursive: true, force: true });
 mkdirSync(stage, { recursive: true });
 
-// 生产依赖安装进暂存目录(干净、不含 devDeps 与源码)
+// dist 为 esbuild 自包含产物(见 scripts/bundle.mjs),无需安装任何依赖
 cpSync(path.join(root, "package.json"), path.join(stage, "package.json"));
-run("npm", ["install", "--omit=dev", "--no-fund", "--no-audit"], stage);
 cpSync(path.join(root, "dist"), path.join(stage, "dist"), { recursive: true });
 
 // 清单:以 mcpb-manifest.json 为模板,版本号跟随 package.json

@@ -59,17 +59,24 @@ jobs:
         run: |
           node scripts/make-mcpb.mjs
           $f = Get-ChildItem "*.mcpb" | Select-Object -First 1
-          "MCPB_FILE=$($f.Name)" | Add-Content $env:GITHUB_ENV
+          "MCPB_FILE=core/$($f.Name)" | Add-Content $env:GITHUB_ENV
         shell: pwsh
 
+      # 注意:MCPB 生成在 core/ 下,本步骤在仓库根执行,引用必须带 core/ 前缀
+      # (v1.0.2 曾因根目录找不到该文件,PowerShell glob 报错中止了整条 gh release upload,
+      #  而后续 gh release edit 照常执行,发布了缺 zip/MCPB 的 Release)。
       - name: 附加 MCPB 与源码 zip 到 Release 并置为公开
         shell: pwsh
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          $ErrorActionPreference = "Stop"
           $tag = $env:GITHUB_REF_NAME
           git archive --format=zip -o "VersionControlStudio-src-$tag.zip" HEAD
           $files = @("VersionControlStudio-src-$tag.zip")
-          if ($env:MCPB_FILE) { $files += $env:MCPB_FILE }
+          if ($env:MCPB_FILE) {
+            if (-not (Test-Path $env:MCPB_FILE)) { throw "MCPB 文件不存在: $env:MCPB_FILE" }
+            $files += $env:MCPB_FILE
+          }
           gh release upload "$tag" @files --clobber --repo $env:GITHUB_REPOSITORY
           gh release edit "$tag" --draft=false --latest --repo $env:GITHUB_REPOSITORY
